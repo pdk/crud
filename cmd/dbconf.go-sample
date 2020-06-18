@@ -1,0 +1,13 @@
+package main
+
+// copy this to dbconf.go and edit
+// (dbconf.go is .gitignore'd)
+
+const (
+    user     = "***"
+    password = "***"
+    host     = "***"
+    port     = 5432
+    dbname   = "***"
+    sslmode  = "***"
+)
