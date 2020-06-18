@@ -44,6 +44,16 @@ func (f Foo) Delete(db *sql.DB) (Foo, error) {
 	return f, err
 }
 
+func QueryFoo(db *sql.DB, querySQL string, queryParams ...interface{}) ([]Foo, error) {
+	results, err := crudMachine.Query(db, querySQL, queryParams...)
+	return results.([]Foo), err
+}
+
+func QueryOneRowFoo(db *sql.DB, querySQL string, queryParams ...interface{}) (Foo, error) {
+	result, err := crudMachine.QueryOneRow(db, querySQL, queryParams...)
+	return result.(Foo), err
+}
+
 func main() {
 
 	connInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s",
@@ -98,6 +108,22 @@ func main() {
 	}
 
 	log.Printf("final: %v", f)
+
+	row, err := QueryOneRowFoo(db, "select * from foo where id = $1", 1)
+	if err != nil {
+		log.Printf("query one row failed: %v", err)
+	}
+
+	log.Printf("query one row: %v", row)
+
+	rows, err := QueryFoo(db, "select * from foo")
+	if err != nil {
+		log.Printf("query failed: %v", err)
+	}
+
+	for _, r := range rows {
+		log.Printf("query result = %v", r)
+	}
 
 	f, err = f.Delete(db)
 	if err != nil {

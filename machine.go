@@ -40,9 +40,11 @@ type Machine struct {
 func NewMachine(tableName string, exampleStruct interface{}, keyFields ...string) Machine {
 
 	return Machine{
-		Insert: NewInserter(tableName, exampleStruct),
-		Update: NewUpdater(tableName, exampleStruct, keyFields...),
-		Delete: NewDeleter(tableName, exampleStruct, keyFields...),
+		Insert:      NewInserter(tableName, exampleStruct),
+		Update:      NewUpdater(tableName, exampleStruct, keyFields...),
+		Delete:      NewDeleter(tableName, exampleStruct, keyFields...),
+		Query:       NewQueryFunc(tableName, exampleStruct),
+		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 	}
 }
 
@@ -52,5 +54,7 @@ func NewMachineGetID(tableName string, exampleStruct interface{}, idField string
 		InsertGetID: NewAutoIncrIDInserter(tableName, exampleStruct, idField),
 		Update:      NewUpdater(tableName, exampleStruct, idField),
 		Delete:      NewDeleter(tableName, exampleStruct, idField),
+		Query:       NewQueryFunc(tableName, exampleStruct),
+		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 	}
 }
