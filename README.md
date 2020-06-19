@@ -57,4 +57,4 @@ Example:
 Struct tags, ala `db:"bar"` are supported to specifying column names, if they
 differ from field names.
 
-Limitations: Only supports postgres style ("$1") bind markers.
+Limitations: Supports multiple bind marker styles, but InsertGetID only does postgres style ID retrieval.
