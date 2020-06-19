@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"strconv"
 
 	"github.com/pdk/crud/describe"
 )
 
 // NewUpdater creates a new updater CRUDFunc.
-func NewUpdater(tableName string, exampleStruct interface{}, keyFields ...string) CRUDFunc {
+func NewUpdater(bindStyle BindStyle, tableName string, exampleStruct interface{}, keyFields ...string) CRUDFunc {
 
 	desc, err := describe.Describe(exampleStruct)
 	if err != nil {
@@ -32,7 +31,7 @@ func NewUpdater(tableName string, exampleStruct interface{}, keyFields ...string
 			stmt += ", "
 		}
 
-		stmt += c + " = $" + strconv.Itoa(i+1)
+		stmt += c + " = " + marker(bindStyle, i+1)
 	}
 
 	stmt += " where "
@@ -42,7 +41,7 @@ func NewUpdater(tableName string, exampleStruct interface{}, keyFields ...string
 			stmt += " and "
 		}
 
-		stmt += c + " = $" + strconv.Itoa(i+1+len(setColumnNames))
+		stmt += c + " = " + marker(bindStyle, i+1+len(setColumnNames))
 	}
 
 	valueCount := len(setIndexes) + len(keyIndexes)
@@ -62,9 +61,6 @@ func NewUpdater(tableName string, exampleStruct interface{}, keyFields ...string
 		for p, i := range keyIndexes {
 			bindValues[p+len(setIndexes)] = itemValue.Field(i).Interface()
 		}
-
-		log.Printf("%s", stmt)
-		log.Printf("%v", bindValues)
 
 		_, err = db.Exec(stmt, bindValues...)
 

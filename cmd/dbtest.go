@@ -19,8 +19,8 @@ type Foo struct {
 }
 
 var (
-	crudMachine = crud.NewMachineGetID("foo", Foo{}, "ID")
-	inserter2   = crud.NewInserter("foo", Foo{})
+	crudMachine  = crud.NewMachineGetID(crud.DollarNumber, "foo", Foo{}, "ID")
+	crudMachine2 = crud.NewMachine(crud.DollarNumber, "foo", Foo{}, "ID")
 )
 
 func (f Foo) Insert(db *sql.DB) (Foo, error) {
@@ -30,7 +30,7 @@ func (f Foo) Insert(db *sql.DB) (Foo, error) {
 }
 
 func (f Foo) Insert2(db *sql.DB) (Foo, error) {
-	err := inserter2(db, f)
+	err := crudMachine2.Insert(db, f)
 	return f, err
 }
 

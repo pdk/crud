@@ -14,7 +14,7 @@ import (
 // generated function MUST be a pointer to the type of struct passed as example.
 // f := NewInserterWithAutoIncrID("foo", "ID", DaStruct{})
 // err := f(db, &daStructInstance)
-func NewAutoIncrIDInserter(tableName string, exampleStruct interface{}, idField string) CRUDFuncGetID {
+func NewAutoIncrIDInserter(bindStyle BindStyle, tableName string, exampleStruct interface{}, idField string) CRUDFuncGetID {
 
 	desc, err := describe.Describe(exampleStruct)
 	if err != nil {
@@ -31,7 +31,7 @@ func NewAutoIncrIDInserter(tableName string, exampleStruct interface{}, idField 
 	idColumnName := desc.ColumnNameOfField(idField)
 
 	insertStmt := fmt.Sprintf("insert into %s (%s) values (%s) returning %s",
-		tableName, insertColumnNamesStr, markers(len(insertColumnIndexes)), idColumnName)
+		tableName, insertColumnNamesStr, markers(bindStyle, 1, len(insertColumnIndexes)), idColumnName)
 
 	return func(db dbHandle, item interface{}) (int64, error) {
 
@@ -58,7 +58,7 @@ func NewAutoIncrIDInserter(tableName string, exampleStruct interface{}, idField 
 // generated function MUST be a pointer to the type of struct passed as example.
 // f := NewInserter("foo", "ID", DaStruct{})
 // err := f(db, &daStructInstance)
-func NewInserter(tableName string, exampleStruct interface{}) CRUDFunc {
+func NewInserter(bindStyle BindStyle, tableName string, exampleStruct interface{}) CRUDFunc {
 
 	desc, err := describe.Describe(exampleStruct)
 	if err != nil {
@@ -72,7 +72,7 @@ func NewInserter(tableName string, exampleStruct interface{}) CRUDFunc {
 	valueCount := len(insertColumnNames)
 
 	insertStmt := fmt.Sprintf("insert into %s (%s) values (%s)",
-		tableName, insertColumnNamesStr, markers(len(insertColumnNames)))
+		tableName, insertColumnNamesStr, markers(bindStyle, 1, len(insertColumnNames)))
 
 	return func(db dbHandle, item interface{}) error {
 

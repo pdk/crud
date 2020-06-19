@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"strconv"
 
 	"github.com/pdk/crud/describe"
 )
 
 // NewDeleter creates a deleter CRUDFunc
-func NewDeleter(tableName string, exampleStruct interface{}, keyFields ...string) CRUDFunc {
+func NewDeleter(bindStyle BindStyle, tableName string, exampleStruct interface{}, keyFields ...string) CRUDFunc {
 
 	desc, err := describe.Describe(exampleStruct)
 	if err != nil {
@@ -29,7 +28,7 @@ func NewDeleter(tableName string, exampleStruct interface{}, keyFields ...string
 			stmt += " and "
 		}
 
-		stmt += c + " = $" + strconv.Itoa(i+1)
+		stmt += c + " = " + marker(bindStyle, i+1)
 	}
 
 	valueCount := len(keyIndexes)
@@ -46,9 +45,6 @@ func NewDeleter(tableName string, exampleStruct interface{}, keyFields ...string
 		for p, i := range keyIndexes {
 			bindValues[p] = itemValue.Field(i).Interface()
 		}
-
-		log.Printf("%s", stmt)
-		log.Printf("%v", bindValues)
 
 		_, err = db.Exec(stmt, bindValues...)
 

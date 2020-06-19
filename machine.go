@@ -11,6 +11,14 @@ type dbHandle interface {
 	Query(query string, args ...interface{}) (*sql.Rows, error)
 }
 
+type BindStyle int
+
+const (
+	QuestionMark = iota
+	DollarNumber
+	ColonName
+)
+
 // CRUDFunc is a function that executes some function in a database for a
 // particular value.
 type CRUDFunc func(dbHandle, interface{}) error
@@ -37,23 +45,23 @@ type Machine struct {
 	QueryOneRow QueryFunc
 }
 
-func NewMachine(tableName string, exampleStruct interface{}, keyFields ...string) Machine {
+func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}, keyFields ...string) Machine {
 
 	return Machine{
-		Insert:      NewInserter(tableName, exampleStruct),
-		Update:      NewUpdater(tableName, exampleStruct, keyFields...),
-		Delete:      NewDeleter(tableName, exampleStruct, keyFields...),
+		Insert:      NewInserter(bindStyle, tableName, exampleStruct),
+		Update:      NewUpdater(bindStyle, tableName, exampleStruct, keyFields...),
+		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, keyFields...),
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 	}
 }
 
-func NewMachineGetID(tableName string, exampleStruct interface{}, idField string) Machine {
+func NewMachineGetID(bindStyle BindStyle, tableName string, exampleStruct interface{}, idField string) Machine {
 
 	return Machine{
-		InsertGetID: NewAutoIncrIDInserter(tableName, exampleStruct, idField),
-		Update:      NewUpdater(tableName, exampleStruct, idField),
-		Delete:      NewDeleter(tableName, exampleStruct, idField),
+		InsertGetID: NewAutoIncrIDInserter(bindStyle, tableName, exampleStruct, idField),
+		Update:      NewUpdater(bindStyle, tableName, exampleStruct, idField),
+		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, idField),
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 	}
