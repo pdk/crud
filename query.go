@@ -35,10 +35,10 @@ func NewQueryFunc(tableName string, exampleStruct interface{}) QueryFunc {
 			nextStructPtr := reflect.New(exampleItemType)
 			nextStruct := nextStructPtr.Elem()
 
-			scanItems := []interface{}{}
+			scanItems := make([]interface{}, colCount, colCount)
 			for i := 0; i < colCount; i++ {
 				nextFld := nextStruct.Field(i).Addr().Interface()
-				scanItems = append(scanItems, nextFld)
+				scanItems[i] = nextFld
 			}
 
 			err := rows.Scan(scanItems...)
@@ -71,10 +71,10 @@ func NewQueryOneRowFunc(tableName string, exampleStruct interface{}) QueryFunc {
 		nextStructPtr := reflect.New(exampleItemType)
 		nextStruct := nextStructPtr.Elem()
 
-		scanItems := []interface{}{}
+		scanItems := make([]interface{}, colCount, colCount)
 		for i := 0; i < colCount; i++ {
 			nextFld := nextStruct.Field(i).Addr().Interface()
-			scanItems = append(scanItems, nextFld)
+			scanItems[i] = nextFld
 		}
 
 		err := db.QueryRow(querySQL, queryParameters...).
