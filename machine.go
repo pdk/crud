@@ -46,12 +46,14 @@ type Machine struct {
 	InsertGetID CRUDFuncGetID
 	Update      CRUDFunc
 	Delete      CRUDFunc
+	Upsert      CRUDFunc
 	Query       QueryFunc
 	QueryOneRow QueryFunc
 	TableName   string
 	Columns     []string
 }
 
+// NewMachine creates a new CRUD machine that supports standard operations.
 func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}, keyFields ...string) Machine {
 
 	desc, err := describe.Describe(exampleStruct)
@@ -63,6 +65,7 @@ func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}
 		Insert:      NewInserter(bindStyle, tableName, exampleStruct),
 		Update:      NewUpdater(bindStyle, tableName, exampleStruct, keyFields...),
 		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, keyFields...),
+		Upsert:      NewUpserter(bindStyle, tableName, exampleStruct, keyFields...),
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 		TableName:   tableName,
@@ -70,6 +73,8 @@ func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}
 	}
 }
 
+// NewMachineGetID creates a new CRUD machine that supports standard operations, and gets
+// the ID value for autogen IDs.
 func NewMachineGetID(bindStyle BindStyle, tableName string, exampleStruct interface{}, idField string) Machine {
 
 	desc, err := describe.Describe(exampleStruct)
@@ -81,6 +86,7 @@ func NewMachineGetID(bindStyle BindStyle, tableName string, exampleStruct interf
 		InsertGetID: NewAutoIncrIDInserter(bindStyle, tableName, exampleStruct, idField),
 		Update:      NewUpdater(bindStyle, tableName, exampleStruct, idField),
 		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, idField),
+		Upsert:      nil, // cannot do upsert with autogen ID
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
 		TableName:   tableName,

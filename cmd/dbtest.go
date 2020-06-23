@@ -35,6 +35,11 @@ func (f Foo) Insert2(db *sql.DB) (Foo, error) {
 	return f, err
 }
 
+func (f Foo) Upsert(db *sql.DB) (Foo, error) {
+	err := crudMachine2.Upsert(db, f)
+	return f, err
+}
+
 func (f Foo) Update(db *sql.DB) (Foo, error) {
 	err := crudMachine.Update(db, f)
 	return f, err
@@ -106,6 +111,12 @@ func main() {
 	f, err = f.Update(db)
 	if err != nil {
 		log.Printf("failed to update: %v", err)
+	}
+
+	f.Name = "Roger"
+	f, err = f.Upsert(db)
+	if err != nil {
+		log.Printf("failed to upsert: %v", err)
 	}
 
 	log.Printf("final: %v", f)
