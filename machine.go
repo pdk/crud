@@ -2,6 +2,9 @@ package crud
 
 import (
 	"database/sql"
+	"log"
+
+	"github.com/pdk/crud/describe"
 )
 
 // dbHandle is an interface where we can accept either a *sql.DB or a *sql.Trx
@@ -36,6 +39,8 @@ type QueryFunc func(dbHandle, string, ...interface{}) (interface{}, error)
 // update the input value with a new ID value from the database. Query will
 // return a slice of the original type and should be converted to that.
 // QueryOneRow will return a single instance of the struct type.
+// Columns provides the column names, in the correct order, for constructing
+// queries.
 type Machine struct {
 	Insert      CRUDFunc
 	InsertGetID CRUDFuncGetID
@@ -43,9 +48,16 @@ type Machine struct {
 	Delete      CRUDFunc
 	Query       QueryFunc
 	QueryOneRow QueryFunc
+	TableName   string
+	Columns     []string
 }
 
 func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}, keyFields ...string) Machine {
+
+	desc, err := describe.Describe(exampleStruct)
+	if err != nil {
+		log.Fatalf("cannot construct crud.Machine for %T: %v", exampleStruct, err)
+	}
 
 	return Machine{
 		Insert:      NewInserter(bindStyle, tableName, exampleStruct),
@@ -53,10 +65,17 @@ func NewMachine(bindStyle BindStyle, tableName string, exampleStruct interface{}
 		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, keyFields...),
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
+		TableName:   tableName,
+		Columns:     desc.Columns(),
 	}
 }
 
 func NewMachineGetID(bindStyle BindStyle, tableName string, exampleStruct interface{}, idField string) Machine {
+
+	desc, err := describe.Describe(exampleStruct)
+	if err != nil {
+		log.Fatalf("cannot construct crud.Machine for %T: %v", exampleStruct, err)
+	}
 
 	return Machine{
 		InsertGetID: NewAutoIncrIDInserter(bindStyle, tableName, exampleStruct, idField),
@@ -64,5 +83,7 @@ func NewMachineGetID(bindStyle BindStyle, tableName string, exampleStruct interf
 		Delete:      NewDeleter(bindStyle, tableName, exampleStruct, idField),
 		Query:       NewQueryFunc(tableName, exampleStruct),
 		QueryOneRow: NewQueryOneRowFunc(tableName, exampleStruct),
+		TableName:   tableName,
+		Columns:     desc.Columns(),
 	}
 }

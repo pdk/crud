@@ -1,2 +1,6 @@
 github.com/lib/pq v1.7.0 h1:h93mCPfUSkaul3Ka/VG8uZdmW1uMHDGxzu0NWHuJmHY=
 github.com/lib/pq v1.7.0/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+github.com/pdk/query v0.0.2 h1:+qU5HhYTrTQNDSWXdqzsMEIvcBhYBUHuj80GAhLw03c=
+github.com/pdk/query v0.0.2/go.mod h1:VBFVXMBGcesNislUQuEh/ruPaWTZtCVoiWFO9uliFBw=
+github.com/pdk/query v0.0.3 h1:N64b83DeP2uTZMl9r2087MFoc84G07r4sF3U0mXzSaE=
+github.com/pdk/query v0.0.3/go.mod h1:VBFVXMBGcesNislUQuEh/ruPaWTZtCVoiWFO9uliFBw=

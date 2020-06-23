@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/pdk/crud"
+	q "github.com/pdk/query"
 
 	_ "github.com/lib/pq"
 )
@@ -22,7 +23,22 @@ type Foo struct {
 var (
 	crudMachine  = crud.NewMachineGetID(crud.DollarNumber, "foo", Foo{}, "ID")
 	crudMachine2 = crud.NewMachine(crud.DollarNumber, "foo", Foo{}, "ID")
+
+	// queryMachine = NewQueryMachine(crudMachine)
+	queryMachine = NewQueryFactory(crudMachine)
+
+	FooByAge = NewFooQuery(q.Where("age =", q.Bind(nil)))
 )
+
+func NewFooQuery(qry q.Builder) func(*sql.DB, ...interface{}) ([]Foo, error) {
+
+	//queryFunc := queryMachine.NewQuery(qry)
+	queryFunc := queryMachine(qry)
+
+	return func(db *sql.DB, args ...interface{}) ([]Foo, error) {
+		return typeFix(queryFunc(db, args...))
+	}
+}
 
 func (f Foo) Insert(db *sql.DB) (Foo, error) {
 	var err error
@@ -46,13 +62,19 @@ func (f Foo) Delete(db *sql.DB) (Foo, error) {
 }
 
 func QueryFoo(db *sql.DB, querySQL string, queryParams ...interface{}) ([]Foo, error) {
-	results, err := crudMachine.Query(db, querySQL, queryParams...)
-	return results.([]Foo), err
+	return typeFix(crudMachine.Query(db, querySQL, queryParams...))
 }
 
 func QueryOneRowFoo(db *sql.DB, querySQL string, queryParams ...interface{}) (Foo, error) {
-	result, err := crudMachine.QueryOneRow(db, querySQL, queryParams...)
-	return result.(Foo), err
+	return typeFixOne(crudMachine.QueryOneRow(db, querySQL, queryParams...))
+}
+
+func typeFix(data interface{}, err error) ([]Foo, error) {
+	return data.([]Foo), err
+}
+
+func typeFixOne(data interface{}, err error) (Foo, error) {
+	return data.(Foo), err
 }
 
 func main() {
@@ -127,6 +149,15 @@ func main() {
 
 	for _, r := range rows {
 		log.Printf("query result = %v", r)
+	}
+
+	rows, err = FooByAge(db, 32)
+	if err != nil {
+		log.Printf("query by age failed: %v", err)
+	}
+
+	for _, r := range rows {
+		log.Printf("query by age result = %v", r)
 	}
 
 	f, err = f.Delete(db)
