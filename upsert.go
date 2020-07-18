@@ -41,8 +41,6 @@ func NewUpserter(bindStyle BindStyle, tableName string, exampleStruct interface{
 		tableName, insertColumnNamesStr, markers(bindStyle, 1, len(insertColumnNames)),
 		keyColumnNamesStr, onConflictClause)
 
-	log.Printf("upsertStmt: %s", upsertStmt)
-
 	valueCount := len(insertColumnNames)
 
 	return func(db dbHandle, item interface{}) error {
